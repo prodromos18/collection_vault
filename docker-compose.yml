@@ -1,0 +1,15 @@
+services:
+
+# The first time this container will run, it will create a Postgres role
+# and database with the following details
+# no need to run CREATE USER manually
+  db:
+    image: postgres
+    container_name: collection_vault_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${HOST_PORT}:${CONTAINER_PORT}"
