@@ -35,7 +35,7 @@ def upgrade() -> None:
     op.create_table('collection_cards',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('scryfall_id', sa.UUID(), nullable=False),
-    sa.Column('collection_id', sa.String(), nullable=False),
+    sa.Column('collection_id', sa.String(), nullable=True),
     sa.Column('quantity', sa.Float(), nullable=False),
     sa.ForeignKeyConstraint(['scryfall_id'], ['skryfall_cards.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
