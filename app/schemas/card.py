@@ -2,27 +2,30 @@
 # used for API request validation etc
 from uuid import UUID
 from pydantic import BaseModel
+from typing import Optional
 
 class SkryfallCard(BaseModel):
-    id: UUID
+    id: Optional[UUID] = None
     scryfall_id: str
-    deck_id: str
     name: str
-    mana_cost: float
+    mana_cost: str
     type_line: str
     oracle_text: str
     image_url: str
 
 class CollectionCard(BaseModel):
-    id: UUID
-    scryfall_id: str # foreign key to ScryfallCard
-    collection_id: str
+    id: Optional[UUID] = None
+    scryfall_id: str  # foreign key to ScryfallCard
+    collection_id: Optional[str] = None
     quantity: int
 
 class AddCardRequest(BaseModel):
     name: str
-    quantity: int
+    quantity: int = 1
 
 class CardResponse(BaseModel):
+    name: str
     type_line: str
-    error_message: str
+    mana_cost: str
+    message: Optional[str] = None
+    error_message: Optional[str] = None

@@ -11,7 +11,7 @@ class SkryfallCard(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     scryfall_id = Column(String, unique=True, nullable=False)
     name = Column(String, nullable=False)
-    mana_cost = Column(Float, nullable=False)
+    mana_cost = Column(String, nullable=False)
     type_line = Column(String, nullable=False)
     oracle_text = Column(String, nullable=False)
     image_url = Column(String, nullable=True)
@@ -21,8 +21,8 @@ class CollectionCard(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     scryfall_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("skryfall_cards.id", ondelete="CASCADE"),
+        String,
+        ForeignKey("skryfall_cards.scryfall_id", ondelete="CASCADE"),
         nullable=False,
     )
     collection_id = Column(String, nullable=True)

@@ -21,13 +21,17 @@ def fetch_card_data_by_name(name: str) -> SkryfallCard:
         logger.info(f"Card data for {name} have been fetched succesfully")
 
         data=response.json()
+
+    image_url = ""
+    if data.get("image_uris"):
+        image_url = data["image_uris"].get("normal", "")
         scryfall_card= SkryfallCard(
             scryfall_id=data.get("id"),
             name=data.get("name"),
             mana_cost=data.get("mana_cost", ""),
             type_line=data.get("type_line", ""),
             oracle_text=data.get("oracle_text", ""),
-            image_url=data.get("image_uris",{}) 
+            image_url=image_url 
         )
 
     return scryfall_card

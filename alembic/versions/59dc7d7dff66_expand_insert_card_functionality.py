@@ -25,7 +25,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('scryfall_id', sa.String(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
-    sa.Column('mana_cost', sa.Float(), nullable=False),
+    sa.Column('mana_cost', sa.String(), nullable=False),
     sa.Column('type_line', sa.String(), nullable=False),
     sa.Column('oracle_text', sa.String(), nullable=False),
     sa.Column('image_url', sa.String(), nullable=True),
@@ -34,10 +34,10 @@ def upgrade() -> None:
     )
     op.create_table('collection_cards',
     sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('scryfall_id', sa.UUID(), nullable=False),
+    sa.Column('scryfall_id', sa.String(), nullable=False),
     sa.Column('collection_id', sa.String(), nullable=True),
     sa.Column('quantity', sa.Float(), nullable=False),
-    sa.ForeignKeyConstraint(['scryfall_id'], ['skryfall_cards.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['scryfall_id'], ['skryfall_cards.scryfall_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.drop_table('card')
