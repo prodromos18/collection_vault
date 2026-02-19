@@ -43,3 +43,14 @@ def add_scryfall_card_to_db(session: Session, scryfall_card: SkryfallCard):
         raise e
     finally:
         session.close()
+
+def lookup_card_in_db(session: Session, name: str):
+    try:
+        # return scryfall_id to query the CollectionCard table
+        scryfall_card = (session.query(SkryfallCard).filter_by(name=name).first())
+        result=session.query(CollectionCard).filter_by(scryfall_id=scryfall_card.scryfall_id).first()
+    except Exception as e:
+        raise ValueError(f"Error while looking up card in db with name {name}, error: {e}")
+
+    if result:    
+        return scryfall_card
