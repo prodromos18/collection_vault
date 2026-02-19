@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.schemas.card import AddCardRequest, CardResponse, SkryfallCard
-from app.services.collection import add_card, lookup_card
+from app.schemas.card import AddCardRequest, CardResponse
+from app.services.collection import add_card
 import logging
 
 logger = logging.getLogger(__name__)
