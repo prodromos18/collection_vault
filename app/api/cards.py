@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.schemas.card import AddCardRequest, CardResponse
-from app.services.collection import add_card
+from app.services.collection import add_card, lookup_card
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,6 @@ def fetch_card_endpoint(name):
     logger.info("fetch_card_endpoint has started")
     logger.info(f"Looking up {name} in the collection")
     result = lookup_card(name)
-    breakpoint()
     return result
 
 

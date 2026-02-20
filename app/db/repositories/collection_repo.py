@@ -1,5 +1,6 @@
 from app.models.card import CollectionCard, SkryfallCard
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 import logging
 
@@ -46,8 +47,14 @@ def add_scryfall_card_to_db(session: Session, scryfall_card: SkryfallCard):
 
 def lookup_card_in_db(session: Session, name: str):
     try:
-        # return scryfall_id to query the CollectionCard table
-        scryfall_card = (session.query(SkryfallCard).filter_by(name=name).first())
+        # return scryfall_id to query the CollectionCard table using fuzzy search
+        # through the pg_trgm extension. Returns the match with the highest similarity
+        scryfall_card = (
+        session.query(SkryfallCard)
+        .filter(func.similarity(SkryfallCard.name, name) > 0.3)
+        .order_by(func.similarity(SkryfallCard.name, name).desc())
+        .first()
+    )
         result=session.query(CollectionCard).filter_by(scryfall_id=scryfall_card.scryfall_id).first()
     except Exception as e:
         raise ValueError(f"Error while looking up card in db with name {name}, error: {e}")
