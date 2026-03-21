@@ -1,4 +1,5 @@
 from app.models.card import CollectionCard, SkryfallCard
+from app.db.repositories.common import OP_MAPPING
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
@@ -55,9 +56,39 @@ def lookup_card_in_db(session: Session, name: str):
         .order_by(func.similarity(SkryfallCard.name, name).desc())
         .first()
     )
+        if scryfall_card:
+            logger.info(f"A card with a similar name to {name} exists in the magic realm {(scryfall_card.name)}")
+        else:
+            logger.info(f"A card with a name like {name} does not exist in MTG")
         result=session.query(CollectionCard).filter_by(scryfall_id=scryfall_card.scryfall_id).first()
     except Exception as e:
         raise ValueError(f"Error while looking up card in db with name {name}, error: {e}")
 
     if result:    
         return scryfall_card
+
+def lookup_card_in_db_by_param(session: Session, **kwargs):
+    try:
+        # construct the query according to the search criteria provided by the user
+        # criteria consist of field name mapped to operator and value:
+        # {
+        #   "mana_cost": {"op": "gte", "value": 3},
+        #   "type_line": {"op": "contains", "value": "Creature"}
+        # }
+        filters = []
+        for field_name, criterion in kwargs.items():
+            op_func = OP_MAPPING[criterion["op"]]
+            value = criterion["value"]
+            column = getattr(SkryfallCard, field_name)
+            expression = op_func(column, value)
+            filters.append(expression)
+
+        results = (
+            session.query(SkryfallCard)
+            .join(CollectionCard, CollectionCard.scryfall_id == SkryfallCard.scryfall_id)
+            .filter(*filters)
+            .all()
+        )
+        return results
+    except Exception as e:
+        raise ValueError(f"Error while looking up cards by parameters, error: {e}")

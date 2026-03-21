@@ -2,7 +2,8 @@ import logging
 from app.services.scryfall import fetch_card_data_by_name
 from app.db.repositories.collection_repo import (
     add_to_collection_with_scryfall,
-    lookup_card_in_db
+    lookup_card_in_db,
+    lookup_card_in_db_by_param
 )
 from app.db.session import SessionLocal
 
@@ -45,6 +46,16 @@ def lookup_card(name: str):
             "error_message": None
         }
 
-    
-
-    
+def lookup_card_by_parameters(**kwargs):
+    session = SessionLocal()
+    scryfall_cards = lookup_card_in_db_by_param(session, **kwargs)
+    return [
+        {
+            "name": card.name,
+            "type_line": card.type_line,
+            "mana_cost": card.mana_cost,
+            "message": None,
+            "error_message": None,
+        }
+        for card in scryfall_cards
+    ]
