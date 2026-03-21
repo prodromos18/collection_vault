@@ -2,7 +2,7 @@
 # used for API request validation etc
 from uuid import UUID
 from pydantic import BaseModel
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 class SkryfallCard(BaseModel):
     id: Optional[UUID] = None
@@ -29,3 +29,11 @@ class CardResponse(BaseModel):
     mana_cost: str
     message: Optional[str] = None
     error_message: Optional[str] = None
+
+class SearchCriterion(BaseModel):
+    op: str
+    value: Any
+
+class SearchRequest(BaseModel):
+    # holds a criteria dict mapping field names to SearchCriterion
+    criteria: Dict[str, SearchCriterion]

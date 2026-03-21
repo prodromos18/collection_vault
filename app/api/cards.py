@@ -1,6 +1,7 @@
 from fastapi import APIRouter
-from app.schemas.card import AddCardRequest, CardResponse
-from app.services.collection import add_card
+from typing import List
+from app.schemas.card import AddCardRequest, CardResponse, SearchRequest
+from app.services.collection import add_card, lookup_card, lookup_card_by_parameters
 import logging
 
 logger = logging.getLogger(__name__)
@@ -24,14 +25,13 @@ def fetch_card_endpoint(name):
     logger.info("fetch_card_endpoint has started")
     logger.info(f"Looking up {name} in the collection")
     result = lookup_card(name)
-    breakpoint()
     return result
 
 
-# @router.get("/search_by", response_model=SkryfallCard)
-# def search_cards_endpoint(payload: AddCardRequest):
-#     "Return cards according to a specific search parameter"
-#     logger.info(f"Returning cards with {payload.parameter}")
-#     logger.info(f"payload: {payload}")
-#     result = lookup_card_by_parameter
-    
+@router.post("/search_by", response_model=List[CardResponse])
+def search_cards_endpoint(payload: SearchRequest):
+    """Return cards matching the given search criteria"""
+    logger.info(f"Searching cards with criteria: {payload.criteria}")
+    criteria = {field: {"op": c.op, "value": c.value} for field, c in payload.criteria.items()}
+    result = lookup_card_by_parameters(**criteria)
+    return result
