@@ -1,9 +1,12 @@
 import logging
+from app.models.card import SkryfallCard
 from app.services.scryfall import fetch_card_data_by_name
 from app.db.repositories.collection_repo import (
     add_to_collection_with_scryfall,
     lookup_card_in_db,
-    lookup_card_in_db_by_param
+    lookup_card_in_db_by_param,
+    fuzzy_search_collection,
+    delete_from_collection,
 )
 from app.db.session import SessionLocal
 
@@ -45,6 +48,36 @@ def lookup_card(name: str):
             "message": f"Successfully found {scryfall_card.name} in the collection",
             "error_message": None
         }
+
+def search_cards_by_name(name: str):
+    session = SessionLocal()
+    matches = fuzzy_search_collection(session, name)
+    return [
+        {
+            "scryfall_id": scryfall_card.scryfall_id,
+            "name": scryfall_card.name,
+            "type_line": scryfall_card.type_line,
+            "mana_cost": scryfall_card.mana_cost,
+            "quantity": collection_card.quantity,
+        }
+        for scryfall_card, collection_card in matches
+    ]
+
+def delete_card(scryfall_id: str, quantity: float = None):
+    session = SessionLocal()
+    scryfall_card = session.query(SkryfallCard).filter_by(scryfall_id=scryfall_id).first()
+    if not scryfall_card:
+        return None
+    card_name = scryfall_card.name
+    result = delete_from_collection(session, scryfall_id, quantity)
+    if result is None:
+        return None
+    deleted_quantity = result.get("deleted_quantity") if not result["partial"] else quantity
+    return {
+        "message": "deleted",
+        "name": card_name,
+        "quantity": deleted_quantity,
+    }
 
 def lookup_card_by_parameters(**kwargs):
     session = SessionLocal()

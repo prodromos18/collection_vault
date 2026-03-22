@@ -67,6 +67,41 @@ def lookup_card_in_db(session: Session, name: str):
     if result:    
         return scryfall_card
 
+def fuzzy_search_collection(session: Session, name: str):
+    try:
+        results = (
+            session.query(SkryfallCard, CollectionCard)
+            .join(CollectionCard, CollectionCard.scryfall_id == SkryfallCard.scryfall_id)
+            .filter(func.similarity(SkryfallCard.name, name) > 0.3)
+            .order_by(func.similarity(SkryfallCard.name, name).desc())
+            .all()
+        )
+        return results
+    except Exception as e:
+        raise ValueError(f"Error during fuzzy search for '{name}': {e}")
+
+def delete_from_collection(session: Session, scryfall_id: str, quantity: float = None):
+    try:
+        collection_card = session.query(CollectionCard).filter_by(scryfall_id=scryfall_id).first()
+        if not collection_card:
+            return None
+
+        if quantity is not None and (collection_card.quantity - quantity) > 0:
+            collection_card.quantity -= quantity
+            session.commit()
+            return {"partial": True, "remaining_quantity": collection_card.quantity}
+
+        deleted_quantity = collection_card.quantity
+        session.query(CollectionCard).filter_by(scryfall_id=scryfall_id).delete()
+        session.query(SkryfallCard).filter_by(scryfall_id=scryfall_id).delete()
+        session.commit()
+        return {"partial": False, "deleted_quantity": deleted_quantity}
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
+
 def lookup_card_in_db_by_param(session: Session, **kwargs):
     try:
         # construct the query according to the search criteria provided by the user

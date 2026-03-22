@@ -37,3 +37,15 @@ class SearchCriterion(BaseModel):
 class SearchRequest(BaseModel):
     # holds a criteria dict mapping field names to SearchCriterion
     criteria: Dict[str, SearchCriterion]
+
+class CardMatch(BaseModel):
+    scryfall_id: str
+    name: str
+    type_line: str
+    mana_cost: str
+    quantity: float
+
+class DeleteCardResponse(BaseModel):
+    message: str
+    name: str
+    quantity: float
